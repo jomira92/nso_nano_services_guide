@@ -1,0 +1,12 @@
+<config-template xmlns="http://tail-f.com/ns/config/1.0">
+  <devices xmlns="http://tail-f.com/ns/ncs">
+    <device>
+      <name>{/device}</name>
+      <config>
+        <ntp xmlns="http://tail-f.com/ned/cisco-ios-xr">
+          <max-associations>10</max-associations>
+        </ntp>
+      </config>
+    </device>
+  </devices>
+</config-template>

@@ -1,0 +1,13 @@
+<ncs-package xmlns="http://tail-f.com/ns/ncs-packages">
+  <name>NTP</name>
+  <package-version>1.1</package-version>
+  <description>Generated Nano Services python skeleton</description>
+  <ncs-min-version>6.2</ncs-min-version>
+
+  <component>
+    <name>main</name>
+    <application>
+      <python-class-name>NTP.main.Main</python-class-name>
+    </application>
+  </component>
+</ncs-package>

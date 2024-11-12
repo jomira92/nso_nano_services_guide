@@ -1,0 +1,150 @@
+module NTP {
+  namespace "http://com/example/basic-NTP/NTP";
+  prefix NTP;
+
+  import ietf-inet-types {
+    prefix inet;
+  }
+  import tailf-ncs {
+    prefix ncs;
+  }
+
+  organization "Tail-f";
+  description
+     "An example Nano service module that create virtual routers instances and
+      configure them. The NTP instances could be implemented as containers
+      or VMs, but are here represented by a simple list in the service YANG
+      model itself for simulating interaction with a virtualization
+      infrastructure.";
+
+  revision 2021-10-13 {
+    description
+      "Initial revision.";
+  }
+
+  // Service model
+  list NTP {
+    key name;
+
+    uses ncs:nano-plan-data;
+    uses ncs:service-data;
+    ncs:servicepoint "NTP-servicepoint";
+
+    leaf name {
+      type string;
+    }
+
+    leaf vm-up-and-running {
+      type boolean;
+      config false;
+    }
+
+    leaf-list device {
+      type leafref {
+        path "/ncs:devices/ncs:device/ncs:name";
+      }
+    }
+
+    leaf ADDRESS {
+      type inet:ipv4-address;
+    }
+
+    leaf server-done {
+      type boolean;
+    }
+
+    leaf peer-done {
+      type boolean;
+    }
+
+    leaf max-associations-done {
+      type boolean;
+    }
+  }
+
+  // Nano service specifics
+  /*
+  identity vm-requested {
+    base ncs:plan-state;
+  }
+
+  identity vm-configured {
+    base ncs:plan-state;
+  }
+  */
+  identity server-configured {
+    base ncs:plan-state;
+  }
+
+  identity peer-configured {
+    base ncs:plan-state;
+  }
+
+  identity max-associations-configured {
+    base ncs:plan-state;
+  }
+  /*
+  identity link {
+    base ncs:plan-component-type;
+  }
+
+  identity dev-setup {
+    base ncs:plan-state;
+  }
+  */
+
+  ncs:plan-outline NTP-plan {
+    description "Plan for configuring a VM-based router";
+
+    ncs:component-type "ncs:self" {
+      ncs:state "ncs:init";
+      ncs:state "NTP:server-configured" {
+        ncs:create {
+          // Invoke a service template to configure the NTP
+          ncs:nano-callback;
+          ncs:pre-condition {
+            // Wait for a state to become true
+            ncs:monitor "$SERVICE" {
+              ncs:trigger-expr "server-done = 'true'";
+            }
+          }
+        }
+      }
+       ncs:state "NTP:peer-configured" {
+        ncs:create {
+          // Invoke a service template to configure the NTP
+          ncs:nano-callback;
+          ncs:pre-condition {
+            // Wait for a state to become true
+            ncs:monitor "$SERVICE" {
+              ncs:trigger-expr "peer-done = 'true'";
+            }
+          }
+        }
+      }
+       ncs:state "NTP:max-associations-configured" {
+        ncs:create {
+          // Invoke a service template to configure the NTP
+          ncs:nano-callback;
+          ncs:pre-condition {
+            // Wait for a state to become true
+            ncs:monitor "$SERVICE" {
+              ncs:trigger-expr "max-associations-done = 'true'";
+            }
+          }
+        }
+      }
+      ncs:state "ncs:ready";
+    }
+  }
+
+  ncs:service-behavior-tree NTP-servicepoint {
+    description "A static, single component behavior tree";
+    ncs:plan-outline-ref "NTP:NTP-plan";
+    ncs:selector {
+      ncs:create-component "'self'" {
+        ncs:component-type-ref "ncs:self";
+      }
+    }
+  }
+}
